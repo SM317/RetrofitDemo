@@ -1,13 +1,16 @@
 package com.example.demoretrofit;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,20 +24,22 @@ import com.example.demoretrofit.WebAPI.RetroAPI;
 import com.example.demoretrofit.WebAPI.RetroFitClient;
 
 import java.util.List;
+import java.util.Timer;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     // creating variables for our edittext,
     // button, textview and progressbar.
     private EditText nameEdt, jobEdt;
     private Button postDataBtn;
     private TextView responseTV;
     private ProgressBar loadingPB;
+    private CountDownTimer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main1);
+        setContentView(R.layout.activity_main);
         // initializing our views
         nameEdt = findViewById(R.id.idEdtName);
         jobEdt = findViewById(R.id.idEdtJob);
@@ -52,10 +57,26 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 // calling a method to post the data and passing our name and job.
-                postJobData(nameEdt.getText().toString(), jobEdt.getText().toString());
-               // getHeroes();
+                //postJobData(nameEdt.getText().toString(), jobEdt.getText().toString());
+                timer.start();
             }
         });
+
+        timer = new CountDownTimer(1000,100) {
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                //Fail message and re-initialize
+                if(timer != null)
+                    timer.cancel();
+                Intent intent = new Intent(MainActivity.this,MovieNameActivity.class);
+                startActivity(intent);
+            }
+        };
     }
 
     private void postJobData(String name, String job) {
@@ -86,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
                 // below line we are setting our
                 // string to our text view.
                 responseTV.setText(responseString);
+                timer.start();
             }
 
             @Override
@@ -94,34 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 // setting text to our text view when
                 // we get error response from API.
                 responseTV.setText("Error found is : " + t.getMessage());
-            }
-        });
-    }
-
-    private void getHeroes() {
-        // below line is for displaying our progress bar.
-        loadingPB.setVisibility(View.VISIBLE);
-        Call<List<HeroViewModel>> callHero = RetroFitClient.getInstance().getMyApi().getHeroes();
-        callHero.enqueue(new Callback<>() {
-            @Override
-            public void onResponse(Call<List<HeroViewModel>> call, Response<List<HeroViewModel>> response) {
-                loadingPB.setVisibility(View.GONE);
-                List<HeroViewModel> heroList = response.body();
-
-                //Creating an String array for the ListView
-                String[] heroes = new String[heroList.size()];
-
-                //looping through all the heroes and inserting the names inside the string array
-                for (int i = 0; i < heroList.size(); i++) {
-                    heroes[i] = heroList.get(i).getName();
-                }
-                //displaying the string array into listview
-                int count = heroes.length;
-            }
-            @Override
-            public void onFailure(Call<List<HeroViewModel>> call, Throwable t) {
-                loadingPB.setVisibility(View.GONE);
-                Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

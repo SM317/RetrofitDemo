@@ -24,4 +24,10 @@ public class RetroFitClient {
     public RetroAPI getMyApi() {
         return myApi;
     }
+
+    public void clearInstance(){
+        if (instance != null){
+            clearInstance();
+        }
+    }
 }
